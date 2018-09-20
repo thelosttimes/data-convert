@@ -122,8 +122,7 @@ public class MigrationTask implements Runnable {
 		if(bodies.length == 4) {
 			fail = true;
 		}
-		
-		sql = "select " + column_from + " from " + table +" "+ table_where +" limit "+min +" , "+table_pageSize;
+		sql = "select " + column_from.replaceAll("@",",")+ " from " + table +" "+ table_where +" limit "+min +" , "+table_pageSize;
 		
 		return true;
 	}
@@ -218,10 +217,10 @@ public class MigrationTask implements Runnable {
 		table_pageSize = bodies[6];
 		
 		column_append = null;
-		insert_sql = "insert into " + table_to + "(" + column_to + ") values(";
+		insert_sql = "insert into " + table_to + "(" + column_to.replaceAll("@",",") + ") values(";
 		if(StringUtils.isNotBlank(column_to) && StringUtils.isNotBlank(column_from)) {
-			String[] columns = StringUtils.split(column_to, ",");
-			String[] columns_from = StringUtils.split(column_from, ",");
+			String[] columns = StringUtils.split(column_to, "@");
+			String[] columns_from = StringUtils.split(column_from, "@");
 			if(columns.length != columns_from.length && columns.length - columns_from.length != 1) {
 				throw new MigrationException("不支持的表：" + table + ",column_to长度必须 等于 或 大于一个 column_from长度。columns_from=" 
 						+ column_from + " columns_to=" + column_to);
@@ -245,7 +244,7 @@ public class MigrationTask implements Runnable {
 		select_sql = "select id from " + table_to + " where 1=1 ";
 		exist_all_content = false;
 		if(StringUtils.isNotBlank(column_to)) {
-			String[] columns = StringUtils.split(column_to, ",");
+			String[] columns = StringUtils.split(column_to, "@");
 			for(int i=0; i<columns.length; i++) {
 				if("all_content".equals(columns[i])) {
 					exist_all_content = true;
